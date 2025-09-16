@@ -1,8 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from movies.models import Movie
 from .utils import calculate_cart_total
-from .models import Order, Item
+from .models import Order, Item, Feedback
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 def index(request):
     cart_total = 0
     movies_in_cart = []
@@ -49,6 +50,33 @@ def purchase(request):
     template_data = {}
     template_data['title'] = 'Purchase confirmation'
     template_data['order_id'] = order.id
+    template_data['show_feedback_modal'] = True
     return render(request, 'cart/purchase.html',
+        {'template_data': template_data})
+
+def submit_feedback(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        feedback_text = request.POST.get('feedback_text', '').strip()
+        
+        if feedback_text:  # Only save if there's feedback text
+            feedback = Feedback()
+            feedback.name = name if name else None
+            feedback.feedback_text = feedback_text
+            if request.user.is_authenticated:
+                feedback.user = request.user
+            feedback.save()
+            messages.success(request, 'Thank you for your feedback!')
+        else:
+            messages.warning(request, 'Please provide feedback text.')
+    
+    return redirect('cart.feedback_list')
+
+def feedback_list(request):
+    feedbacks = Feedback.objects.all().order_by('-date')
+    template_data = {}
+    template_data['title'] = 'Customer Feedback'
+    template_data['feedbacks'] = feedbacks
+    return render(request, 'cart/feedback_list.html',
         {'template_data': template_data})
 # Create your views here.

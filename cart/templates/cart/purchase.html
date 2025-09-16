@@ -9,8 +9,52 @@
         <p>Congratulations, purchase completed. Order
           number is: <b>#{{ template_data.order_id }}</b>
         </p>
+        <div class="mt-4">
+          <a href="{% url 'home.index' %}" class="btn bg-dark text-white">Continue Shopping</a>
+          <a href="{% url 'accounts.orders' %}" class="btn btn-outline-dark">View Orders</a>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Feedback Modal -->
+{% if template_data.show_feedback_modal %}
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="feedbackModalLabel">How was your checkout experience?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>We'd love to hear about your checkout experience! Your feedback helps us improve the GT Movie Store.</p>
+        <form id="feedbackForm" method="post" action="{% url 'cart.submit_feedback' %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="name" class="form-label">Name (Optional)</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Leave empty to remain anonymous">
+          </div>
+          <div class="mb-3">
+            <label for="feedback_text" class="form-label">Your thoughts on the checkout process *</label>
+            <textarea class="form-control" id="feedback_text" name="feedback_text" rows="4" placeholder="Tell us about your experience..." required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Skip Feedback</button>
+        <button type="submit" form="feedbackForm" class="btn bg-dark text-white">Submit Feedback</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+    feedbackModal.show();
+});
+</script>
+{% endif %}
+
 {% endblock content %}
